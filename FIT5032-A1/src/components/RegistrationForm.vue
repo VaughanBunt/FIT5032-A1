@@ -117,6 +117,26 @@
       </div>
     </div>
   </form>
+  <div class="row mt-5" v-if="submittedCards.length">
+    <div class="d-flex flex-wrap justify-content-start">
+      <div
+        v-for="(card, index) in submittedCards"
+        :key="index"
+        class="card m-2"
+        style="width: 18rem"
+      >
+        <div class="card-header">User Information</div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">Username: {{ card.username }}</li>
+          <li class="list-group-item">First Name: {{ card.firstName }}</li>
+          <li class="list-group-item">Last Name: {{ card.lastName }}</li>
+          <li class="list-group-item">DOB: {{ card.dob }}</li>
+          <li class="list-group-item">Email: {{ card.email }}</li>
+          <li class="list-group-item">Password: {{ card.password }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
