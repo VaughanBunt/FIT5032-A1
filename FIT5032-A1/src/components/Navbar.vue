@@ -2,7 +2,7 @@
   <nav class="navbar navbar-expand-lg bg-primary">
     <nav class="navbar">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">SportsConnect</a>
+        <router-link class="navbar-brand" to="/">SportsConnect</router-link>
       </div>
     </nav>
 
@@ -63,7 +63,9 @@
     </div>
 
     <nav class="me-auto">
-      <IconButton icon="person-circle" />
+      <div class="container-fluid">
+        <AccountIcon />
+      </div>
     </nav>
   </nav>
 </template>
@@ -71,5 +73,5 @@
 <script setup>
 import Dropdown from './Dropdown.vue'
 import SearchBar from './SearchBar.vue'
-import IconButton from './IconButton.vue'
+import AccountIcon from './AccountIcon.vue'
 </script>
