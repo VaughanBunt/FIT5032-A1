@@ -121,7 +121,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import {getAuth, createUserWithEmailAndPassword} from "firebase/auth"
+import { auth, db } from '@/firebase/firebase.js'
+import { useUserStore } from '@/stores/user.js'
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { doc, setDoc } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
 
 
@@ -136,19 +139,26 @@ const formData = ref({
 })
 
 const router = useRouter()
-const auth = getAuth()
 
-const register = () => {
-  createUserWithEmailAndPassword(auth, formData.value.email, formData.value.password)
-  .then((data) => {
-    console.log("Firebase Register Successful!")
-    router.push("/FireLogin")
-  }).catch((error) => {
-    console.log(error.code)
-  })
+const register = async () => {
+  const data = await createUserWithEmailAndPassword(auth, formData.value.email, formData.value.password)
+  await updateProfile(data.user, {displayName: formData.value.username})
+  const userDoc = {
+    username: formData.value.username,
+    firstName: formData.value.firstName,
+    lastName: formData.value.lastName,
+    dob: formData.value.dob,
+    email: formData.value.email,
+    createdAt: new Date()
+  }
+  await setDoc(doc(db, "users", data.user.uid), userDoc)
+  const userStore = useUserStore()
+  userStore.firebaseUser = data.user
+  userStore.profile = userDoc
+  console.log("Firebase Register Successful!")
 }
 
-const submitForm = () => {
+const submitForm = async () => {
   validateName(true, formData.value.username, 'username')
   validateName(true, formData.value.firstName, 'firstName')
   validateName(true, formData.value.lastName, 'lastName')
@@ -157,7 +167,13 @@ const submitForm = () => {
   validatePassword(true)
   validateConfirmPassword(true)
   if (!errors.value.username && !errors.value.password) {
-    register()
+    try{
+      await register()
+      clearForm()
+      router.push("/")
+    } catch (error){
+      console.log(error.code)
+    }
   }
 }
 
@@ -170,6 +186,28 @@ const errors = ref({
   password: null,
   confirmPassword: null,
 })
+
+const clearForm = () => {
+  formData.value = {
+    username: '',
+    firstName: '',
+    lastName: '',
+    dob: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  }
+
+  errors.value = {
+    username: null,
+    firstName: null,
+    lastName: null,
+    dob: null,
+    email: null,
+    password: null,
+    confirmPassword: null,
+  }
+}
 
 const validateName = (blur, name, err) => {
   if (name.length < 3) {

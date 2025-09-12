@@ -12,7 +12,8 @@ onMounted(() => {
 <template>
   <Navbar class="fixed-top" />
   <div class="position-relative" :style="{ paddingTop: navbarHeight + 'px' }">
-    <div class="[position-absolute top-${} start-0 w-100 h-100 bg-cover"></div>
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-cover"></div>
+
 
     <div class="position-relative z-index-1">
       <router-view />
