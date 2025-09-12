@@ -21,6 +21,7 @@
 </template>
 
 <script setup>
+//todo, make these nav-links
 const props = defineProps({
   label: { type: String, required: true },
   items: {

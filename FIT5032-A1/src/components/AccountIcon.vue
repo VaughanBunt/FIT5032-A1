@@ -9,11 +9,11 @@
     ></i>
 
     <ul class="dropdown-menu dropdown-menu-end">
-      <li>
-        <router-link class="dropdown-item" to="/login">Login</router-link>
+      <li class="nav-item">
+        <router-link class="dropdown-item nav-link" to="/FireLogin">Login</router-link>
       </li>
-      <li>
-        <router-link class="dropdown-item" to="/register">Register</router-link>
+      <li class="nav-item">
+        <router-link class="dropdown-item nav-link" to="/FireRegister">Register</router-link>
       </li>
     </ul>
   </div>

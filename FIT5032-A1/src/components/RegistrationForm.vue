@@ -117,30 +117,14 @@
       </div>
     </div>
   </form>
-  <div class="row mt-5" v-if="submittedCards.length">
-    <div class="d-flex flex-wrap justify-content-start">
-      <div
-        v-for="(card, index) in submittedCards"
-        :key="index"
-        class="card m-2"
-        style="width: 18rem"
-      >
-        <div class="card-header">User Information</div>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">Username: {{ card.username }}</li>
-          <li class="list-group-item">First Name: {{ card.firstName }}</li>
-          <li class="list-group-item">Last Name: {{ card.lastName }}</li>
-          <li class="list-group-item">DOB: {{ card.dob }}</li>
-          <li class="list-group-item">Email: {{ card.email }}</li>
-          <li class="list-group-item">Password: {{ card.password }}</li>
-        </ul>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import {getAuth, createUserWithEmailAndPassword} from "firebase/auth"
+import { useRouter } from 'vue-router'
+
+
 const formData = ref({
   username: '',
   firstName: '',
@@ -151,8 +135,18 @@ const formData = ref({
   confirmPassword: '',
 })
 
-//temporary solution to store the data
-const submittedCards = ref([])
+const router = useRouter()
+const auth = getAuth()
+
+const register = () => {
+  createUserWithEmailAndPassword(auth, formData.value.email, formData.value.password)
+  .then((data) => {
+    console.log("Firebase Register Successful!")
+    router.push("/FireLogin")
+  }).catch((error) => {
+    console.log(error.code)
+  })
+}
 
 const submitForm = () => {
   validateName(true, formData.value.username, 'username')
@@ -163,9 +157,7 @@ const submitForm = () => {
   validatePassword(true)
   validateConfirmPassword(true)
   if (!errors.value.username && !errors.value.password) {
-    submittedCards.value.push({
-      ...formData.value,
-    })
+    register()
   }
 }
 

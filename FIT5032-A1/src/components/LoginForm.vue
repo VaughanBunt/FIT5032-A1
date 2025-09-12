@@ -1,0 +1,62 @@
+<template>
+  <form class="container mt-4" @submit.prevent="signin">
+
+    <div class="row mb-3 align-items-center">
+      <label for="email" class="col-sm-3 col-form-label">Email</label>
+      <div class="col-sm-9">
+        <input
+          type="email"
+          class="form-control"
+          id="email"
+          placeholder="Enter email"
+          v-model="formData.email"
+        />
+      </div>
+    </div>
+
+    <div class="row mb-3 align-items-center">
+      <label for="password" class="col-sm-3 col-form-label">Password</label>
+      <div class="col-sm-9">
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          placeholder="Enter password"
+          v-model="formData.password"
+        />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-sm-3 col-sm-9">
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </div>
+    </div>
+  </form>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import {getAuth, signInWithEmailAndPassword} from "firebase/auth"
+import { useRouter } from 'vue-router'
+
+
+const formData = ref({
+  email: '',
+  password: ''
+})
+
+const router = useRouter()
+const auth = getAuth()
+
+const signin = () => {
+  signInWithEmailAndPassword(auth, formData.value.email, formData.value.password)
+  .then((data) => {
+    console.log("Firebase Login Successful!")
+    router.push("/")
+    console.log(auth.currentUser)
+  }).catch((error) => {
+    console.log(error.code)
+  })
+}
+</script>
