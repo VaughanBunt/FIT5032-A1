@@ -24,9 +24,9 @@
           placeholder="Enter password"
           v-model="formData.password"
         />
+        <div v-if="err" class="text-danger">{{ err }}</div>
       </div>
     </div>
-
     <div class="row">
       <div class="offset-sm-3 col-sm-9">
         <button type="submit" class="btn btn-primary">Sign In</button>
@@ -46,15 +46,25 @@ const formData = ref({
   password: ''
 })
 
+const errorMessages = {
+  "auth/invalid-email": "The email address is not valid.",
+  "auth/invalid-credential": "Incorrect password. Please try again.",
+  "auth/missing-password": "Please enter your password."
+}
+
+const err = ref("")
+
 const router = useRouter()
 
 const signin = () => {
   signInWithEmailAndPassword(auth, formData.value.email, formData.value.password)
   .then(() => {
     console.log("Firebase Login Successful!")
+    err.value = ""
     router.push("/")
   }).catch((error) => {
     console.log(error.code)
+    err.value = errorMessages[error.code]
   })
 }
 </script>

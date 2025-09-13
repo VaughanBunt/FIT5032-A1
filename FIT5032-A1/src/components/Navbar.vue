@@ -1,77 +1,97 @@
 <template>
-  <nav class="navbar navbar-expand-lg bg-primary">
-    <nav class="navbar">
-      <div class="container-fluid">
-        <router-link class="navbar-brand" to="/">SportsConnect</router-link>
+  <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+    <div class="container-fluid">
+
+      <router-link class="navbar-brand" to="/">SportsConnect</router-link>
+
+      <form class="d-flex flex-grow-1 me-auto" role="search">
+        <SearchBar />
+      </form>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Explore
+            </a>
+            <ul class="dropdown-menu">
+              <li><router-link class="dropdown-item" to="/Map">Map</router-link></li>
+              <li><router-link class="dropdown-item" to="/Search">Search</router-link></li>
+              <li><router-link class="dropdown-item" :to="{ path: '/Browse', query: { type: 'team' } }">Teams</router-link></li>
+              <li><router-link class="dropdown-item" :to="{ path: '/Browse', query: { type: 'event' } }">Events</router-link></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Teams and Events
+            </a>
+            <ul class="dropdown-menu">
+              <li><router-link class="dropdown-item" to="/Browse">Browse</router-link></li>
+              <li><router-link class="dropdown-item" :to="{ path: '/Browse', query: { type: 'team' } }">Teams</router-link></li>
+              <li><router-link class="dropdown-item" :to="{ path: '/Browse', query: { type: 'event' } }">Events</router-link></li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <router-link class="nav-link" to="/Articles">
+              Articles
+            </router-link>
+          </li>
+
+
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              About Us
+            </a>
+            <ul class="dropdown-menu">
+              <li><router-link class="dropdown-item" to="/AboutUs">Meet the team</router-link></li>
+              <li><router-link class="dropdown-item" to="/Contact">Contact us</router-link></li>
+            </ul>
+          </li>
+
+        </ul>
       </div>
-    </nav>
 
-    <form class="d-flex flex-grow-1 me-auto" role="search">
-      <SearchBar />
-    </form>
-
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-      <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-        <li class="nav-item dropdown">
-          <Dropdown
-            label="Explore"
-            :items="[
-              { text: 'Map', action: '() => {}' },
-              { text: 'Search', action: '() => {}' },
-              { text: 'Teams', action: '() => {}' },
-              { text: 'Events', action: '() => {}' },
-            ]"
-            @select="() => {}"
-          />
-        </li>
-        <li class="nav-item dropdown">
-          <Dropdown
-            label="Teams and Events"
-            :items="[
-              { text: 'Teams', action: '() => {}' },
-              { text: 'Events', action: '() => {}' },
-            ]"
-            @select="() => {}"
-          />
-        </li>
-        <li class="nav-item dropdown">
-          <Dropdown label="Articles" @select="() => {}" />
-        </li>
-        <li class="nav-item dropdown">
-          <Dropdown
-            label="About Us"
-            :items="[
-              { text: 'Meet the team', action: '() => {}' },
-              { text: 'Contact us', action: '() => {}' },
-            ]"
-            @select="() => {}"
-          />
-        </li>
-      </ul>
-    </div>
-
-    <nav class="me-auto">
-      <div class="container-fluid">
+      <div class="d-flex align-items-center ms-2 me-2">
         <AccountIcon />
       </div>
-    </nav>
+    </div>
   </nav>
 </template>
 
 <script setup>
-import Dropdown from './Dropdown.vue'
 import SearchBar from './SearchBar.vue'
 import AccountIcon from './AccountIcon.vue'
 </script>
