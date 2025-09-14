@@ -62,10 +62,11 @@
                   <strong>{{ review.user.name }}</strong>
                   <small class="text-muted">{{ review.date }}</small>
                 </div>
-                <div class="text-warning">
-                  <span v-for="n in 5" :key="n">
-                    {{ n <= review.rating ? '★' : '☆' }}
-                  </span>
+                <div>
+                  <StarRating
+                  v-bind:rating="review.rating"
+                  :editable="false"
+                  />
                 </div>
                 <p class="mb-0 mt-2">{{ review.comment }}</p>
               </div>
@@ -74,19 +75,20 @@
             <div v-if="!alreadyReviewed && alreadyApplied">
               <h5 class="mt-4">Leave a Review</h5>
               <StarRating
-                v-model:rating="reviewData.reviewRating"
+                v-model:rating="reviewData.rating"
+                :editable="true"
                 @blur="validateRating(true)"
                 @input="validateRating(false)"
               />
-              <div v-if="reviewErrors.reviewRating" class="text-danger">{{ reviewErrors.reviewRating }}</div>
+              <div v-if="reviewErrors.rating" class="text-danger">{{ reviewErrors.rating }}</div>
               <textarea
-                v-model="reviewData.reviewComment"
+                v-model="reviewData.comment"
                 class="form-control mt-2"
                 placeholder="Write your review..."
                 @blur="validateComment(true)"
                 @input="validateComment(false)"
               ></textarea>
-              <div v-if="reviewErrors.reviewComment" class="text-danger">{{ reviewErrors.reviewComment }}</div>
+              <div v-if="reviewErrors.comment" class="text-danger">{{ reviewErrors.comment }}</div>
               <button class="btn btn-success mt-2" @click="leaveReview">
                 Submit Review
               </button>
@@ -111,13 +113,13 @@ const loading = ref(true)
 const error = ref(null)
 
 const reviewData = ref({
-  reviewRating: 0,
-  reviewComment: ""
+  rating: 0,
+  comment: ""
 })
 
 const reviewErrors = ref({
-  reviewRating: null,
-  reviewComment: null
+  rating: null,
+  comment: null
 })
 
 const loggedIn = computed(() => auth.currentUser != null)
@@ -135,20 +137,20 @@ onMounted(async () => {
 })
 
 const validateComment = (blur) => {
-  if (!reviewData.value.reviewComment || reviewData.value.reviewComment.trim().length < 10){
-    if (blur) reviewErrors.value.reviewComment = "Comment must be at least 10 characters"
+  if (!reviewData.value.comment || reviewData.value.comment.trim().length < 10){
+    if (blur) reviewErrors.value.comment = "Comment must be at least 10 characters"
   } else{
-    reviewErrors.value.reviewComment = null
+    reviewErrors.value.comment = null
   }
 }
 
 const validateRating = (blur) => {
-  if (reviewData.value.reviewRating < 0){
-    if (blur) reviewErrors.value.reviewRating = "Rating must be at least 0, How did you even manage to input a negative number?"
-  } else if (reviewData.value.reviewRating > 5){
-    if (blur) reviewErrors.value.reviewRating = "Rating must be at less than 6"
+  if (reviewData.value.rating < 0){
+    if (blur) reviewErrors.value.rating = "Rating must be at least 0, How did you even manage to input a negative number?"
+  } else if (reviewData.value.rating > 5){
+    if (blur) reviewErrors.value.rating = "Rating must be at less than 6"
   } else{
-    reviewErrors.value.reviewRating = null
+    reviewErrors.value.rating = null
   }
 }
 

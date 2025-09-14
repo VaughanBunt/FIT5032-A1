@@ -3,7 +3,6 @@
     class="card mb-3 text-decoration-none text-dark"
     style="max-width: 600px; cursor: pointer;"
   >
-    <!-- Make only this section clickable -->
     <router-link
       class="row g-0 align-items-center m-2 text-decoration-none text-dark"
       :to="{ path: '/EventDetails', query: { id: event.id } }"
@@ -25,9 +24,8 @@
       </div>
     </router-link>
 
-    <!-- Footer is outside router-link but still part of the card -->
     <div class="card-footer bg-transparent border-top-0 d-flex justify-content-end">
-      <StarRating :rating="avgRating" class="me-auto" />
+      <StarRating :rating="avgRating" :editable="false" class="me-auto" />
 
       <div v-if="!isAdmin">
         <button

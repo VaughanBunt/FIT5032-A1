@@ -5,7 +5,7 @@
       :key="n"
       class="star"
       :class="{ filled: n <= currentRating }"
-      @click="$emit('update:rating', n)"
+      @click="editable ? $emit('update:rating', n) : null"
     >
       ★
     </span>
@@ -16,7 +16,8 @@
 import { computed } from "vue"
 
 const props = defineProps({
-  rating: { type: Number, default: 0 }
+  rating: { type: Number, default: 0 },
+  editable: { type: Boolean, default: true }
 })
 
 const currentRating = computed(() => props.rating)
