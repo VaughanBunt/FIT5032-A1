@@ -166,7 +166,7 @@ const submitForm = async () => {
   validateEmail(true)
   validatePassword(true)
   validateConfirmPassword(true)
-  if (!errors.value.username && !errors.value.password) {
+  if (!hasErrors) {
     try{
       await register()
       clearForm()
@@ -186,6 +186,8 @@ const errors = ref({
   password: null,
   confirmPassword: null,
 })
+
+const hasErrors = Object.values(errors.value).some(err => err !== null)
 
 const clearForm = () => {
   formData.value = {

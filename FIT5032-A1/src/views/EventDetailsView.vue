@@ -73,12 +73,20 @@
             <p v-else class="text-muted">No reviews yet.</p>
             <div v-if="!alreadyReviewed && alreadyApplied">
               <h5 class="mt-4">Leave a Review</h5>
-              <StarRating v-model:rating="reviewRating" />
+              <StarRating
+                v-model:rating="reviewData.reviewRating"
+                @blur="validateRating(true)"
+                @input="validateRating(false)"
+              />
+              <div v-if="reviewErrors.reviewRating" class="text-danger">{{ reviewErrors.reviewRating }}</div>
               <textarea
-                v-model="reviewComment"
+                v-model="reviewData.reviewComment"
                 class="form-control mt-2"
                 placeholder="Write your review..."
+                @blur="validateComment(true)"
+                @input="validateComment(false)"
               ></textarea>
+              <div v-if="reviewErrors.reviewComment" class="text-danger">{{ reviewErrors.reviewComment }}</div>
               <button class="btn btn-success mt-2" @click="leaveReview">
                 Submit Review
               </button>
@@ -101,8 +109,16 @@ const route = useRoute()
 const event = ref(null)
 const loading = ref(true)
 const error = ref(null)
-const reviewRating = ref(0)
-const reviewComment = ref("")
+
+const reviewData = ref({
+  reviewRating: 0,
+  reviewComment: ""
+})
+
+const reviewErrors = ref({
+  reviewRating: null,
+  reviewComment: null
+})
 
 const loggedIn = computed(() => auth.currentUser != null)
 const alreadyApplied = computed(() => {
@@ -117,6 +133,24 @@ const alreadyReviewed = computed(() => {
 onMounted(async () => {
   loadData()
 })
+
+const validateComment = (blur) => {
+  if (!reviewData.value.reviewComment || reviewData.value.reviewComment.trim().length < 10){
+    if (blur) reviewErrors.value.reviewComment = "Comment must be at least 10 characters"
+  } else{
+    reviewErrors.value.reviewComment = null
+  }
+}
+
+const validateRating = (blur) => {
+  if (reviewData.value.reviewRating < 0){
+    if (blur) reviewErrors.value.reviewRating = "Rating must be at least 0, How did you even manage to input a negative number?"
+  } else if (reviewData.value.reviewRating > 5){
+    if (blur) reviewErrors.value.reviewRating = "Rating must be at less than 6"
+  } else{
+    reviewErrors.value.reviewRating = null
+  }
+}
 
 const loadData = async () =>{
   try {
@@ -168,6 +202,12 @@ const applyToEvent = async () => {
 
 const leaveReview = async () => {
   if (!auth.currentUser || !event.value) return
+  validateComment(true)
+  validateRating(true)
+
+  const hasErrors = Object.values(reviewErrors.value).some(err => err !== null)
+
+  if (hasErrors) return
 
   const eventRef = doc(db, "events", route.query.id)
 
@@ -176,8 +216,7 @@ const leaveReview = async () => {
       uid: auth.currentUser.uid,
       name: auth.currentUser.displayName || "Anonymous"
     },
-    rating: reviewRating.value,
-    comment: reviewComment.value,
+    ...reviewData.value,
     date: new Date().toISOString().split("T")[0]
   }
 

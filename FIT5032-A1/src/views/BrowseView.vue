@@ -18,13 +18,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import EventCard from '@/components/EventCard.vue'
 import { useRoute } from 'vue-router'
 import { auth, db } from '@/firebase/firebase.js'
 import { collection, getDocs, query, where } from 'firebase/firestore'
+import { onAuthStateChanged } from 'firebase/auth'
 
-const loggedIn = computed(() => auth.currentUser != null)
+const loggedIn = ref(false)
 
 const route = useRoute()
 console.log(route.query)
@@ -45,6 +46,12 @@ const fetchEvents = async () => {
     console.error("Error fetching events:", err)
   }
 }
+
+onMounted(() => {
+  onAuthStateChanged(auth, (user) => {
+    loggedIn.value = !!user
+  })
+})
 
 onMounted(fetchEvents)
 watch(() => route.query, fetchEvents)
