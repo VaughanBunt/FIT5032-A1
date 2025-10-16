@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+  //users
+    match /users/{userId} {
+    	
+      //allow account creation
+    	allow create: if request.auth != null && request.auth.uid == userId;
+      
+      //allow reading account details of user's own account
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      //allow edit and delete of user's own account
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
+      
+      //allow admin to change account status
+      allow update: if request.auth != null
+                    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+                    && ("status" in request.resource.data);
+    }
+		
+    //events
+    match /events/{eventId} {
+      
+      //allow all to read events
+      allow read: if true;
+      
+      //allow user to apply for event and owner to edit event and users to review event
+      allow update: if request.auth != null
+				&& (resource.data.owner.uid == request.auth.uid
+				|| request.resource.data.attendees is list
+        || request.resource.data.reviews is list);
+			
+      //allow owner or admin to delete event
+      allow delete: if request.auth != null
+                    && (resource.data.owner.uid == request.auth.uid
+                        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin");
+			
+      //allow users to create events
+      allow create: if request.auth != null;
+    }
+		
+    //default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
