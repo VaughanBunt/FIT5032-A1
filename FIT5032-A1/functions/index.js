@@ -7,9 +7,39 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
+import { setGlobalOptions } from "firebase-functions";
+import { onRequest } from "firebase-functions/v2/https";
+
+import admin from "firebase-admin";
+
+admin.initializeApp();
+const db = admin.firestore();
+
+import corsModule from "cors";
+const cors = corsModule({ origin: true });
+
+export const CountEvents = onRequest((req, res) =>{
+    cors(req, res, async () =>{
+        try {
+            const uid = req.query.uid;
+            let query = db.collection("events");
+
+            if (uid) {
+                query = query.where("owner.uid", "==", uid);
+            }
+            const snapshot = await query.get();
+
+            const count = snapshot.size;
+
+            res.status(200).json({ count });
+        } catch (error) {
+            console.error("Error counting events: ", error.message);
+            res.status(500).send("Error counting events");
+        }
+    })
+})
+
+
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected

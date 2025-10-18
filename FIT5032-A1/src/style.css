@@ -17,3 +17,34 @@
 .star.filled {
   color: gold;
 }
+
+th {
+	cursor: pointer;
+	user-select: none;
+	transition: background-color 0.3s;
+}
+
+th:hover {
+	background-color: #f8f9fa;
+}
+
+.sorted {
+	font-weight: bold;
+	background-color: #e9ecef;
+}
+
+th span {
+	margin-left: 5px;
+	font-size: 1.2em;
+	color: #007bff;
+}
+
+th.sorted span {
+	color: #28a745;
+}
+
+th input {
+	width: 100%;
+	padding: 0.25rem;
+	font-size: 0.875rem;
+}

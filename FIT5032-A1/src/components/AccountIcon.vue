@@ -21,6 +21,9 @@
         <li class="nav-item">
           <router-link class="dropdown-item nav-link" to="/Profile">Profile</router-link>
         </li>
+        <li class="nav-item" v-if="isAdmin">
+          <router-link class="dropdown-item nav-link" to="/AdminDashboard">Dashboard</router-link>
+        </li>
         <li class="nav-item">
           <button class="dropdown-item nav-link" @click="logout">Logout</button>
         </li>
@@ -52,4 +55,9 @@ const logout = async () => {
   await signOut(auth)
   router.push('/') // redirect home
 }
+
+const isAdmin = computed(() => {
+  console.log('User Role:', userStore.userRole)
+  return isLoggedIn.value && userStore.userRole == "admin"
+})
 </script>

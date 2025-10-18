@@ -99,13 +99,14 @@
 
 <script setup>
 import { auth, db } from '@/firebase/firebase.js'
+import { useUserStore } from '@/stores/user.js'
 import { ref, computed, onMounted } from 'vue'
 import { doc, updateDoc, getDoc, deleteDoc, arrayUnion } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
 import StarRating from './StarRating.vue'
 
+const userStore = useUserStore()
 const loggedIn = computed(() => auth.currentUser != null)
-const userRole = ref("user")
 const router = useRouter()
 
 const alreadyApplied = computed(() => {
@@ -113,22 +114,12 @@ const alreadyApplied = computed(() => {
   return props.event.attendees.some(user => user.uid === auth.currentUser.uid)
 })
 const isAdmin = computed(() => {
-  return loggedIn.value && userRole.value == "admin"
+  return loggedIn.value && userStore.userRole.value == "admin"
 })
 
 const isOwner = computed(() =>{
   return props.event.owner.uid == auth.currentUser.uid
 })
-
-const getRole = async ()=>{
-  if (auth.currentUser) {
-    const docRef = doc(db, "users", auth.currentUser.uid)
-    const snapshot = await getDoc(docRef)
-    if (snapshot.exists()) {
-      userRole.value = snapshot.data().role
-    }
-  }
-}
 
 const props = defineProps({
   event: {
