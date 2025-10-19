@@ -24,9 +24,12 @@
     "firebase": "^12.2.1",
     "firebase-admin": "^13.5.0",
     "firebase-functions": "^6.5.0",
+    "jspdf": "^3.0.3",
+    "jspdf-autotable": "^5.0.2",
     "pinia": "^3.0.3",
     "vue": "^3.5.18",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "vue3-google-map": "^0.25.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",

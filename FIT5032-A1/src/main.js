@@ -12,6 +12,7 @@ import EventDetails from './views/EventDetailsView.vue'
 import CreateEvent from './views/EventCreateView.vue'
 import AdminDashboard from './views/AdminDashboard.vue'
 import PermissionDenied from './views/PermissionDenied.vue'
+import MapView from './views/MapView.vue'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
@@ -29,7 +30,8 @@ const routes = [
   { path: '/EventDetails', name: 'EventDetails', component: EventDetails},
   { path: '/CreateEvent', name: 'CreateEvent', component: CreateEvent},
   { path: '/AdminDashboard', name: 'AdminDashBoard', component: AdminDashboard},
-  { path: '/Denied', name: 'PermissionDenied', component: PermissionDenied}
+  { path: '/Denied', name: 'PermissionDenied', component: PermissionDenied},
+  { path: '/Map', name: 'Map', component: MapView}
 ]
 
 const router = createRouter({

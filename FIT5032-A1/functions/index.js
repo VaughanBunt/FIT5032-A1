@@ -9,6 +9,7 @@
 
 import { setGlobalOptions } from "firebase-functions";
 import { onRequest,  } from "firebase-functions/v2/https";
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 //import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import sendGrid from '@sendgrid/mail';
 import dotenv from 'dotenv';
@@ -43,7 +44,7 @@ export const CountEvents = onRequest((req, res) =>{
             res.status(500).send("Error counting events");
         }
     })
-})
+});
 
 export const EmailParticipants = onRequest({ invoker: "public" }, async (req, res) =>{
     cors(req, res, async() =>{
@@ -95,7 +96,35 @@ export const EmailParticipants = onRequest({ invoker: "public" }, async (req, re
             res.status(500).send("Error sending emails");
         }
     })
-})
+});
+
+const inactivtyThreshold = 60*60*24*7*8; //8 weeks
+export const CheckInactiveUsers = onSchedule('every day 00:00', async () => {
+    const currentTime = new Date().getTime();
+    const db = admin.firestore();
+
+    try {
+        const usersSnapshot = await db.collection('users').get();
+
+        usersSnapshot.forEach(async (doc) => {
+            const user = doc.data();
+            const userId = doc.id;
+
+            if (user.lastSeen) {
+                const lastActiveTime = user.lastSeen.toDate().getTime();
+                const inactivityDuration = currentTime - lastActiveTime;
+
+                if (inactivityDuration > inactivtyThreshold) {
+                await db.collection('users').doc(userId).update({ status: 'inactive' });
+                console.log(`User ${userId} marked as inactive`);
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error checking inactivity: ', error);
+    }
+});
+
 
 //tried to email participants when the record was updated, didn't work
 /*export const EmailParticipants = onDocumentWritten("events/{docID}", async (event) =>{

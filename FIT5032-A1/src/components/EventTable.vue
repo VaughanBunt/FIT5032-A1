@@ -72,12 +72,18 @@
 		<span class="mx-2">Page {{ currentPage }} of {{ totalPages }}</span>
 		<button class="btn btn-sm btn-secondary" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Next</button>
 	</div>
+	<div class="d-flex justify-content-end mb-3">
+		<button class="btn btn-sm btn-primary mr-2" @click="downloadCSV">Download CSV</button>
+		<button class="btn btn-sm btn-primary" @click="downloadPDF">Download PDF</button>
+	</div>
 </template>
 
 <script setup>
 import { collection, getDocs } from 'firebase/firestore'
 import { ref, computed, onMounted } from 'vue'
 import { db } from '@/firebase/firebase.js'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable';
 
 const events = ref([]);
 const searchTitle = ref('');
@@ -181,5 +187,52 @@ const isSortedBy = (key) => {
 onMounted(() => {
 	fetchEvents();
 })
+
+const downloadCSV = () => {
+  const headers = ['Title', 'Date', 'Sport', 'Capacity', 'Owner', 'Reports'];
+  
+  const rows = filteredAndSortedEvents.value.map(event => {
+    return [
+      event.name,
+      event.date,
+      event.sport,
+	  `${event.attendees.length}/${event.capacity}`,
+      event.owner.displayName,
+      event.reports,
+    ];
+  });
+
+  rows.unshift(headers);
+
+  const csvContent = rows.map(row => row.join(',')).join('\n');
+
+  const link = document.createElement('a');
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  link.href = URL.createObjectURL(blob);
+  link.download = 'event_list.csv';
+  link.click();
+};
+
+const downloadPDF = () => {
+  const doc = new jsPDF();
+
+  const headers = ['Title', 'Date', 'Sport', 'Capacity', 'Owner', 'Reports'];
+  const rows = filteredAndSortedEvents.value.map(event => [
+    event.name,
+	event.date,
+	event.sport,
+	`${event.attendees.length}/${event.capacity}`,
+	event.owner.displayName,
+	event.reports,
+  ]);
+
+  autoTable(doc, {
+    head: [headers],
+    body: rows,
+    startY: 20,
+  });
+
+  doc.save('event_list.pdf');
+};
 </script>
 

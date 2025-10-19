@@ -85,6 +85,10 @@
 		<span class="mx-2">Page {{ currentPage }} of {{ totalPages }}</span>
 		<button class="btn btn-sm btn-secondary" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Next</button>
 	</div>
+	<div class="d-flex justify-content-end mb-3">
+		<button class="btn btn-sm btn-primary mr-2" @click="downloadCSV">Download CSV</button>
+		<button class="btn btn-sm btn-primary" @click="downloadPDF">Download PDF</button>
+	</div>
 </template>
 
 <script setup>
@@ -92,6 +96,8 @@ import { collection, getDocs } from 'firebase/firestore'
 import { ref, computed, onMounted, reactive } from 'vue'
 import { db, auth } from '@/firebase/firebase.js'
 import axios from 'axios'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable';
 
 const users = ref([]);
 const eventCounts = reactive({});
@@ -224,5 +230,56 @@ const getEventCount = async (uid) => {
 onMounted(() => {
   fetchUsers();
 })
+
+const downloadCSV = () => {
+  const headers = ['Username', 'Email', 'Role', 'Events', 'Warnings', 'Last Active', 'Online', 'Status'];
+  
+  const rows = filteredAndSortedUsers.value.map(user => {
+    return [
+      user.username,
+      user.email,
+      user.role || 'user',
+      eventCounts[user.id] || 0,
+      user.warnings || 0,
+      formatLastSeen(user.lastSeen),
+      user.online || false,
+      user.status || 'active'
+    ];
+  });
+
+  rows.unshift(headers);
+
+  const csvContent = rows.map(row => row.join(',')).join('\n');
+
+  const link = document.createElement('a');
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  link.href = URL.createObjectURL(blob);
+  link.download = 'user_list.csv';
+  link.click();
+};
+
+const downloadPDF = () => {
+  const doc = new jsPDF();
+
+  const headers = ['Username', 'Email', 'Role', 'Events', 'Warnings', 'Last Active', 'Online', 'Status'];
+  const rows = filteredAndSortedUsers.value.map(user => [
+    user.username,
+    user.email,
+    user.role || 'user',
+    eventCounts[user.id] || 0,
+    user.warnings || 0,
+    formatLastSeen(user.lastSeen),
+    user.online || false,
+    user.status || 'active'
+  ]);
+
+  autoTable(doc, {
+    head: [headers],
+    body: rows,
+    startY: 20,
+  });
+
+  doc.save('user_list.pdf');
+};
 </script>
 
