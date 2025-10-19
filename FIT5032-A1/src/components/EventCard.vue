@@ -114,7 +114,7 @@ const alreadyApplied = computed(() => {
   return props.event.attendees.some(user => user.uid === auth.currentUser.uid)
 })
 const isAdmin = computed(() => {
-  return loggedIn.value && userStore.userRole.value == "admin"
+  return loggedIn.value && userStore.userRole == "admin"
 })
 
 const isOwner = computed(() =>{
@@ -170,7 +170,4 @@ const deleteEvent = async () => {
     console.error("Error deleting event:", err)
   }
 }
-
-
-onMounted(getRole)
 </script>

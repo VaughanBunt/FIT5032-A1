@@ -57,7 +57,6 @@ const logout = async () => {
 }
 
 const isAdmin = computed(() => {
-  console.log('User Role:', userStore.userRole)
   return isLoggedIn.value && userStore.userRole == "admin"
 })
 </script>

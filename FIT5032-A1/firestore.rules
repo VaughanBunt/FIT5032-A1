@@ -9,7 +9,9 @@ service cloud.firestore {
     	allow create: if request.auth != null && request.auth.uid == userId;
       
       //allow reading account details of user's own account
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (request.auth.uid == userId
+      	|| get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+        || ("online" in request.resource.data || "lastSeen" in request.resource.data));
       
       //allow edit and delete of user's own account
       allow update, delete: if request.auth != null && request.auth.uid == userId;

@@ -49,6 +49,10 @@
 				Last Active 
 				<span v-if="isSortedBy('lastActive')">{{ getSortIcon('lastActive') }}</span>
 			</th>
+			<th @click="sort('online')" :class="{'sorted': isSortedBy('online')}">
+				Online
+				<span v-if="isSortedBy('online')">{{ getSortIcon('online') }}</span>
+			</th>
 			<th @click="sort('status')" :class="{'sorted': isSortedBy('status')}">
 				Status 
 				<span v-if="isSortedBy('status')">{{ getSortIcon('status') }}</span>
@@ -63,7 +67,8 @@
 			<td>{{ user.role || 'user' }}</td>
 			<td>{{ eventCounts[user.id] }}</td>
 			<td>{{ user.warnings || '0' }}</td>
-			<td>{{ user.lastActive || 'N/A' }}</td>
+			<td>{{ formatLastSeen(user.lastSeen) }}</td>
+			<td>{{ user.online || false }}</td>
 			<td>{{ user.status || 'active' }}</td>
 			<td>
 				<button class="btn btn-sm btn-info" v-if="user.role !== 'admin'">Promote</button>
@@ -111,6 +116,12 @@ const fetchUsers = async () => {
 		console.error('Error fetching users: ', error)
 	}
 }
+
+const formatLastSeen = (timestamp) => {
+    if (!timestamp) return 'N/A';
+    const date = timestamp.toDate();
+    return date.toLocaleString();
+  }
 
 const totalPages = computed(() => {
   const filteredUsers = filteredAndSortedUsers.value || [];

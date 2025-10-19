@@ -37,7 +37,7 @@ const router = createRouter({
   routes,
 })
 
-createApp(App).use(router).use(pinia).mount('#app')
+const app = createApp(App).use(router).use(pinia).mount('#app')
 
 const userStore = useUserStore()
 
