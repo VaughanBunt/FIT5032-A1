@@ -90,7 +90,7 @@
 <script setup>
 import { collection, getDocs } from 'firebase/firestore'
 import { ref, computed, onMounted, reactive } from 'vue'
-import { db } from '@/firebase/firebase.js'
+import { db, auth } from '@/firebase/firebase.js'
 import axios from 'axios'
 
 const users = ref([]);
@@ -198,13 +198,19 @@ const isSortedBy = (key) => {
   return sortKey.value === key;
 }
 
+
+
 const getEventCount = async (uid) => {
   try {
+	const idToken = await auth.currentUser.getIdToken(true)
 	const response = await axios.get(
 	  "https://countevents-tt6m6dcmxq-uc.a.run.app",
 	  {
 		params: {
 		  uid: uid
+		},
+		headers: {
+			Authorization: `Bearer ${idToken}`
 		}
 	  }
 	);

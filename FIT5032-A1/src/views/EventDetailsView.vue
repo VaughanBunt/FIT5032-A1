@@ -183,11 +183,13 @@ const applyToEvent = async () => {
   try {
     const eventRef = doc(db, "events", event.value.id)
 
+    console.log(auth.currentUser.email)
     await updateDoc(eventRef, {
       attendees: arrayUnion({
         uid: auth.currentUser.uid,
         name: auth.currentUser.displayName || "No Display Name",
-        photo: auth.currentUser.photoURL || ""
+        photo: auth.currentUser.photoURL || "",
+        email: auth.currentUser.email
       })
     })
 
@@ -195,7 +197,7 @@ const applyToEvent = async () => {
     event.value.attendees.push({
       uid: auth.currentUser.uid,
       name: auth.currentUser.displayName || "Anonymous",
-      photo: auth.currentUser.photoURL || ""
+      photo: auth.currentUser.photoURL || "",
     })
   } catch (error) {
     console.error("Error applying to event:", error)

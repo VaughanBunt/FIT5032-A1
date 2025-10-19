@@ -24,5 +24,7 @@ export default {
       rules: {},
     },
   ],
-  globals: {},
+  globals: {
+    process: "readonly",
+  },
 };

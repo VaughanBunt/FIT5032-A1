@@ -2,9 +2,9 @@
   <div class="d-flex justify-content-center align-items-start min-vh-100 py-5">
     <div class="floating-box p-4 w-100" style="max-width: 1000px;">
 
-      <h1 class="text-center">Create Your Event</h1>
+      <h1 class="text-center">{{ eventId ? 'Edit Event' : 'Create Your Event' }}</h1>
 
-      <form class="container mt-4" @submit.prevent="createEvent">
+      <form class="container mt-4" @submit.prevent="eventId ? updateEvent() : createEvent()">
 
         <div class="row mb-3 align-items-center">
           <label for="name" class="col-sm-3 col-form-label">Event Name</label>
@@ -114,7 +114,9 @@
 
         <div class="row">
           <div class="offset-sm-3 col-sm-9">
-            <button type="submit" class="btn btn-success">Create Event</button>
+            <button type="submit" class="btn btn-success">
+              {{ eventId ? 'Update Event' : 'Create Event' }}
+            </button>
           </div>
         </div>
 
@@ -123,13 +125,16 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { auth, db } from '@/firebase/firebase.js'
-import { addDoc, collection } from 'firebase/firestore'
-import { useRouter } from 'vue-router'
+import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore'
+import { useRouter, useRoute } from 'vue-router'
+import axios from 'axios'
 
 const router = useRouter()
+const route = useRoute()
 
 const sports = ["Football (AFL)", "Soccer", "Cricket", "Basketball", "Tennis"]
 
@@ -143,6 +148,8 @@ const formData = ref({
   isPublic: false
 })
 
+const formDataBefore = ref({})
+
 const errors = ref({
   name: null,
   desc: null,
@@ -151,45 +158,64 @@ const errors = ref({
   capacity: null
 })
 
-const validateName = (blur) => {
-  if (!formData.value.name || formData.value.name.trim().length < 3){
-    if (blur) errors.value.name = "Event name must be at least 3 characters"
-  } else{
-    errors.value.name = null
-  }
-}
+const eventId = route.query.id 
 
+const validateName = (blur) => { 
+  if (
+    !formData.value.name 
+    || formData.value.name.trim().length < 3
+  ){
+    if (blur) errors.value.name = "Event name must be at least 3 characters" 
+  } else{ errors.value.name = null } 
+} 
 const validateDesc = (blur) => {
-  if (!formData.value.desc || formData.value.desc.trim().length < 10){
-    if (blur) errors.value.desc = "Description must be at least 10 characters"
-  } else{
-    errors.value.desc = null
-  }
-}
-
+  if (
+    !formData.value.desc 
+    || formData.value.desc.trim().length < 10
+  ){ 
+    if (blur) errors.value.desc = "Description must be at least 10 characters" 
+  } else{ 
+    errors.value.desc = null 
+  } 
+} 
 const validateSport = (blur) => {
   if (!formData.value.sport){
-    if (blur) errors.value.sport = "Please select a sport"
-  } else{
-    errors.value.sport = null
-  }
-}
-
-const validateDate = (blur) => {
-  if (!formData.value.date) {
-    if (blur) errors.value.date = "Please select a date"
-  } else if (new Date(formData.value.date) < new Date()) {
-    if (blur) errors.value.date = "Date must be in the future"
+    if (blur) errors.value.sport = "Please select a sport" 
+  } else{ 
+    errors.value.sport = null 
+  } 
+} 
+const validateDate = (blur) => { 
+  if (!formData.value.date) { 
+    if (blur) errors.value.date = "Please select a date" 
+  } else if (new Date(formData.value.date) < new Date()) { 
+    if (blur) errors.value.date = "Date must be in the future" 
   } else {
-    errors.value.date = null
-  }
+    errors.value.date = null 
+  } 
+} 
+const validateCapacity = (blur) => { 
+  if (
+    formData.value.capacity == null 
+    || formData.value.capacity < 1
+  ){ 
+    if (blur) errors.value.capacity = "Capacity must be at least 1" 
+  } else{ 
+    errors.value.capacity = null 
+  } 
 }
 
-const validateCapacity = (blur) => {
-  if (formData.value.capacity == null || formData.value.capacity < 1){
-    if (blur) errors.value.capacity = "Capacity must be at least 1"
-  }{
-    errors.value.capacity = null
+const loadEvent = async () => {
+  if (!eventId) return
+
+  const eventDocRef = doc(db, "events", eventId)
+  const eventDoc = await getDoc(eventDocRef)
+
+  if (eventDoc.exists()) {
+    formData.value = { ...eventDoc.data() }
+    formDataBefore.value = { ...eventDoc.data() }
+  } else {
+    console.error("Event not found")
   }
 }
 
@@ -201,7 +227,10 @@ const createEvent = async () => {
   validateCapacity(true)
 
   const hasErrors = Object.values(errors.value).some(err => err !== null)
-  if (hasErrors) return
+  if (hasErrors){
+    console.error(errors.value)
+    return
+  }
 
   try {
     const eventDoc = {
@@ -221,4 +250,57 @@ const createEvent = async () => {
     console.error("Error creating event:", err)
   }
 }
+
+const updateEvent = async () => {
+  validateName(true)
+  validateDesc(true)
+  validateSport(true)
+  validateDate(true)
+  validateCapacity(true)
+
+  const hasErrors = Object.values(errors.value).some(err => err !== null)
+  if (hasErrors) return
+
+  try {
+    const eventDocRef = doc(db, "events", eventId)
+    await updateDoc(eventDocRef, { ...formData.value })
+    console.log("Event updated with ID:", eventId)
+    await emailParticipants()
+    router.push({ path: "/EventDetails", query: { id: eventId } })
+  } catch (err) {
+    console.error("Error updating event:", err)
+  }
+}
+
+const emailParticipants = async () => {
+  const dateChanged = formDataBefore.value.date !== formData.value.date;
+  const sportChanged = formDataBefore.value.sport !== formData.value.sport;
+
+  if (!dateChanged && !sportChanged){
+      return;
+  }
+
+  try{
+    const idToken = await auth.currentUser.getIdToken(true)
+    const response = await axios.get(
+      "https://emailparticipants-tt6m6dcmxq-uc.a.run.app",
+      {
+        params: {
+          id: eventId
+        },
+        headers: {
+          Authorization: `Bearer ${idToken}`
+        }
+      }
+    );
+    console.log(response.data)
+  } catch (error) {
+    console.error('Error emailing participants: ', error);
+  }
+  
+}
+
+onMounted(() => {
+  loadEvent()
+})
 </script>

@@ -47,7 +47,7 @@
           </button>
           <ul class="dropdown-menu">
             <li>
-              <button class="dropdown-item" @click="()=>{}" :disabled="alreadyApplied">
+              <button class="dropdown-item" @click="editEvent">
                 Edit Event
               </button>
             </li>
@@ -144,7 +144,8 @@ const applyToEvent = async () => {
       attendees: arrayUnion({
         uid: auth.currentUser.uid,
         name: auth.currentUser.displayName,
-        photo: auth.currentUser.photoURL
+        photo: auth.currentUser.photoURL,
+        email: auth.currentUser.email
       })
     })
   } catch (error) {
@@ -168,6 +169,14 @@ const deleteEvent = async () => {
     router.go(0)
   } catch (err) {
     console.error("Error deleting event:", err)
+  }
+}
+
+const editEvent = async () => {
+  try {
+    router.push(`/CreateEvent?id=${props.event.id}`)
+  } catch (err) {
+    console.error("Error editing event:", err)
   }
 }
 </script>
